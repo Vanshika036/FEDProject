@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Chessboard Grid</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* Optional: make labels monospace and slightly spaced */
+    label {
+      font-family: monospace;
+      margin-right: 4px;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // User story 1:
+    // print(data) - creates a <label> with the given data and appends to document.body
+    function print(data) {
+      const lbl = document.createElement('label');
+      lbl.textContent = data;
+      document.body.appendChild(lbl);
+    }
+
+    // User story 2:
+    // newLine() - appends a <br> to the document.body to go to next line
+    function newLine() {
+      const br = document.createElement('br');
+      document.body.appendChild(br);
+    }
+
+    // User story 3:
+    // board_size - change this value to generate different sized boards
+    const board_size = 8; // example: 8x8 chessboard
+
+    // User story 4:
+    // Use the functions above to print a board_size x board_size chessboard.
+    // At each position print either "*" or "#" in alternating fashion.
+    function drawChessboard(size) {
+      for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
+          // alternating pattern: even (row+col) -> "*", odd -> "#"
+          const symbol = ((row + col) % 2 === 0) ? '*' : '#';
+          print(symbol);
+        }
+        // after finishing a row, move to next line
+        newLine();
+      }
+    }
+
+    // draw it
+    drawChessboard(board_size);
+  </script>
+</body>
+</html>
