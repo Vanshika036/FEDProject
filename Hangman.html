@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hangman Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      max-width: 600px;
+      width: 90%;
+    }
+
+    h1 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    #question {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+
+    #word {
+      font-size: 2em;
+      letter-spacing: 10px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+
+    #letters {
+      margin: 20px 0;
+    }
+
+    .letter {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px 15px;
+      background: #66a6ff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .letter:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    #lives {
+      margin-top: 15px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 1.3em;
+      font-weight: bold;
+      color: green;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1em;
+      background: #ff6f61;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #e85b50;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hangman Game</h1>
+    <div id="question">Loading question...</div>
+    <div id="word"></div>
+    <div id="letters"></div>
+    <div id="lives">Lives: 6</div>
+    <div id="message"></div>
+    <button id="resetBtn">New Game</button>
+  </div>
+
+  <script>
+    const API_URL = "http://codeapi.net.cws18.my-hosting-panel.com/hangman.php";
+    const lettersDiv = document.getElementById("letters");
+    const wordDiv = document.getElementById("word");
+    const questionDiv = document.getElementById("question");
+    const livesDiv = document.getElementById("lives");
+    const messageDiv = document.getElementById("message");
+    const resetBtn = document.getElementById("resetBtn");
+
+    let answer = "";
+    let displayWord = [];
+    let lives = 6;
+
+    // Fetch questions from API
+    async function fetchQuestion() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        const random = data[Math.floor(Math.random() * data.length)];
+        questionDiv.textContent = random.Question;
+        answer = random.Answer.toUpperCase();
+        displayWord = Array(answer.length).fill("_");
+        wordDiv.textContent = displayWord.join(" ");
+      } catch (error) {
+        questionDiv.textContent = "Error fetching question.";
+      }
+    }
+
+    // Generate A-Z buttons
+    function generateLetters() {
+      lettersDiv.innerHTML = "";
+      for (let i = 65; i <= 90; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = String.fromCharCode(i);
+        btn.classList.add("letter");
+        btn.addEventListener("click", () => handleGuess(btn, btn.textContent));
+        lettersDiv.appendChild(btn);
+      }
+    }
+
+    function handleGuess(button, letter) {
+      button.disabled = true;
+      if (answer.includes(letter)) {
+        for (let i = 0; i < answer.length; i++) {
+          if (answer[i] === letter) {
+            displayWord[i] = letter;
+          }
+        }
+        wordDiv.textContent = displayWord.join(" ");
+        if (!displayWord.includes("_")) {
+          messageDiv.textContent = "🎉 You Won!";
+          disableAllButtons();
+        }
+      } else {
+        lives--;
+        livesDiv.textContent = `Lives: ${lives}`;
+        if (lives === 0) {
+          messageDiv.textContent = `💀 Game Over! Answer was: ${answer}`;
+          disableAllButtons();
+        }
+      }
+    }
+
+    function disableAllButtons() {
+      const buttons = document.querySelectorAll(".letter");
+      buttons.forEach(b => b.disabled = true);
+    }
+
+    function resetGame() {
+      lives = 6;
+      messageDiv.textContent = "";
+      livesDiv.textContent = `Lives: ${lives}`;
+      fetchQuestion();
+      generateLetters();
+    }
+
+    resetBtn.addEventListener("click", resetGame);
+
+    // Start game
+    resetGame();
+  </script>
+</body>
+</html>
